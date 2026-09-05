@@ -27,7 +27,10 @@ import {
   spring,
   Video,
 } from "remotion";
-import type { TimelineEntries, VideoBlock, VideoConfig } from "./types";
+import type { TimelineEntry, VideoBlock, VideoConfig } from "./types";
+
+/** 逐块时间轴（TimelineEntry 数组） */
+type TimelineEntries = TimelineEntry[];
 import {
   ICON_COLOR_CYCLE,
   paperColor,
@@ -162,7 +165,7 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 const sectionKeyOf = (b: VideoBlock): string => {
-  const raw = b.section ?? b.tag ?? "";
+  const raw = b.section ?? "";
   if (raw === "outro") return "outro";
   if (b.type === "title" && !raw) return "intro";
   return raw || (b.type === "title" ? "intro" : "news");
@@ -256,6 +259,193 @@ const TopTabs: React.FC<{
   </div>
 );
 
+/** 轨道填充纹理：黄色斜纹（进度猫同源），深浅皮通用 */
+const CAT_TRACK_FILL =
+  "repeating-linear-gradient(90deg,#F5B840,#F5B840 22px,#E8A62E 22px,#E8A62E 44px)";
+
+/**
+ * 猫猫分块进度条（移植自 EduEvidence engine kit ProgressCat，2026-09-01 项目实测版）。
+ * 底部三大/四大章节分栏（宽度按各栏新闻条数比例分配），栏内每条新闻一个小格：
+ * 已播格填满黄纹、当前格随进度填充、未播格空。小猫沿整条轨道跑动（确定性 sin(f)）。
+ */
+const CatProgress: React.FC<{
+  sections: PaperSection[];
+  currentIdx: number;
+  blockProgress: number;
+  globalP: number;
+  tokens: PaperTokens;
+}> = ({ sections, currentIdx, blockProgress, globalP, tokens }) => {
+  const f = useCurrentFrame();
+  const bob = Math.sin(f / 2.6) * 5;
+  const tail = Math.sin(f / 3.4) * 16;
+  const ear = f % 26 < 3 ? 1.25 : 1;
+  const trackL = 60;
+  const trackR = 1860;
+  const catX = trackL + Math.min(1, Math.max(0, globalP)) * (trackR - trackL);
+  const trackFill = tokens.dark
+    ? "repeating-linear-gradient(90deg,#F5B84033,#F5B84033 22px,#E8A62E33 22px,#E8A62E33 44px)"
+    : "rgba(60,50,30,0.08)";
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: 0,
+        bottom: 0,
+        width: "100%",
+        height: 34,
+        zIndex: 30,
+        pointerEvents: "none",
+      }}
+    >
+      {/* 跑道底（虚线顶边，进度猫同款） */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 8,
+          height: 18,
+          margin: "0 48px",
+          background: tokens.dark ? "#16161E" : "#EFE9DA",
+          borderTop: `3px dashed ${tokens.dark ? "#3A3A48" : "#C9BFA5"}`,
+          borderRadius: 6,
+        }}
+      />
+      {/* 分栏 + 小格 */}
+      <div
+        style={{
+          position: "absolute",
+          left: 60,
+          right: 60,
+          top: 12,
+          height: 10,
+          display: "flex",
+          gap: 10,
+        }}
+      >
+        {sections.map((sec, s) => {
+          const n = sec.indices.length;
+          return (
+            <div
+              key={sec.key}
+              style={{ flex: `${Math.max(1, n)} 1 0`, display: "flex", gap: 3 }}
+            >
+              {sec.indices.map((bi, g) => {
+                const done = bi < currentIdx;
+                const active = bi === currentIdx;
+                return (
+                  <div
+                    key={bi}
+                    style={{
+                      flex: 1,
+                      background: trackFill,
+                      borderRadius: 5,
+                      overflow: "hidden",
+                      position: "relative",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: done
+                          ? "100%"
+                          : active
+                            ? `${Math.min(100, blockProgress * 100)}%`
+                            : "0%",
+                        background: CAT_TRACK_FILL,
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+      {/* 猫（移植：尾巴/耳朵/腿/起伏，确定性） */}
+      <svg
+        width={92}
+        height={72}
+        viewBox="0 0 92 72"
+        style={{
+          position: "absolute",
+          left: catX - 46,
+          top: -52,
+          transform: `translateY(${bob}px)`,
+        }}
+      >
+        <g style={{ transform: "scaleX(-1)", transformOrigin: "46px 36px" }}>
+          <path
+            d="M 70 44 Q 88 40 84 22"
+            stroke="#E8843C"
+            strokeWidth={7}
+            fill="none"
+            strokeLinecap="round"
+            style={{ transform: `rotate(${tail}deg)`, transformOrigin: "70px 44px" }}
+          />
+          <ellipse cx="52" cy="46" rx="24" ry="16" fill="#F5A25D" />
+          <circle cx="24" cy="34" r="16" fill="#F5A25D" />
+          <path
+            d="M 12 24 L 9 10 L 21 18 Z"
+            fill="#F5A25D"
+            transform={`scale(${ear}) translate(${(1 - ear) * 14},0)`}
+          />
+          <path
+            d="M 30 22 L 34 9 L 38 23 Z"
+            fill="#F5A25D"
+            transform={`scale(${ear}) translate(${(1 - ear) * -6},0)`}
+          />
+          <circle cx="19" cy="32" r="2.4" fill="#3B3A36" />
+          <circle cx="29" cy="32" r="2.4" fill="#3B3A36" />
+          <path
+            d="M 21 39 Q 24 41 27 39"
+            stroke="#3B3A36"
+            strokeWidth={2}
+            fill="none"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 52 34 q 4 3 8 0 M 56 42 q 4 3 8 0"
+            stroke="#E07B2E"
+            strokeWidth={3}
+            fill="none"
+            strokeLinecap="round"
+          />
+          <g>
+            <rect
+              x="36"
+              y="58"
+              width="7"
+              height="13"
+              rx="3"
+              fill="#E8843C"
+              style={{
+                transform: `rotate(${Math.sin(f / 2.6) * 16}deg)`,
+                transformOrigin: "39px 58px",
+              }}
+            />
+            <rect
+              x="60"
+              y="58"
+              width="7"
+              height="13"
+              rx="3"
+              fill="#E8843C"
+              style={{
+                transform: `rotate(${-Math.sin(f / 2.6) * 16}deg)`,
+                transformOrigin: "63px 58px",
+              }}
+            />
+          </g>
+        </g>
+      </svg>
+    </div>
+  );
+};
+
 const BottomKeywordTabs: React.FC<{
   keywords: string[];
   activeIndex: number;
@@ -347,35 +537,40 @@ const SubtitleBar: React.FC<{
   tokens: PaperTokens;
   fps: number;
   fontSize: number;
-}> = ({ text, seqFrame, tokens, fps, fontSize }) => {
+}> = ({ text, tokens, fontSize }) => {
   if (!text) return null;
-  const pop = spring({ frame: seqFrame, fps, config: { damping: 200, stiffness: 260 } });
-  const outline = tokens.subtitleStyle === "outline";
+  // 直接渲染：无胶囊底、无弹入，旁白全文常驻；浅皮深字白描边 / 深皮白字黑描边
+  const dark = tokens.dark;
   return (
     <div
       style={{
         position: "absolute",
-        bottom: fontSize * 4.8,
-        left: "50%",
-        transform: `translateX(-50%) translateY(${(1 - pop) * 8}px)`,
-        opacity: pop,
-        background: outline ? "transparent" : "#282828D9",
-        borderRadius: outline ? 0 : 999,
-        padding: outline ? 0 : `${fontSize * 0.26}px ${fontSize * 0.7}px`,
-        color: "#FFFFFF",
-        fontSize,
-        fontWeight: 600,
+        bottom: 108,
+        left: 0,
+        right: 0,
+        display: "flex",
+        justifyContent: "center",
+        padding: "0 80px",
         zIndex: 40,
-        textShadow: outline
-          ? "-2px 0 0 #000, 2px 0 0 #000, 0 -2px 0 #000, 0 2px 0 #000, -2px -2px 0 #000, 2px 2px 0 #000, -2px 2px 0 #000, 2px -2px 0 #000"
-          : "none",
-        maxWidth: "76%",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textAlign: "center",
+        pointerEvents: "none",
       }}
     >
-      {text}
+      <div
+        style={{
+          maxWidth: "86%",
+          fontSize,
+          fontWeight: 800,
+          lineHeight: 1.38,
+          textAlign: "center",
+          color: dark ? "#FFFFFF" : "#3A3830",
+          textShadow: dark
+            ? "-2.5px 0 0 #000, 2.5px 0 0 #000, 0 -2.5px 0 #000, 0 2.5px 0 #000, -2.5px -2.5px 0 #000, 2.5px 2.5px 0 #000, -2.5px 2.5px 0 #000, 2.5px -2.5px 0 #000"
+            : "0 1px 0 #FFFFFF, 0 -1px 0 #FFFFFF, 1px 0 0 #FFFFFF, -1px 0 0 #FFFFFF, 1px 1px 0 #FFFFFF, -1px -1px 0 #FFFFFF, 1px -1px 0 #FFFFFF, -1px 1px 0 #FFFFFF",
+          whiteSpace: "normal",
+        }}
+      >
+        {text}
+      </div>
     </div>
   );
 };
@@ -942,7 +1137,7 @@ export const NewsPaperTemplate: React.FC<{
   voiceoverRoot?: string;
 }> = ({ config, timelineEntries, fps, voiceoverRoot }) => {
   const frame = useCurrentFrame();
-  const { fps: videoFps, width, height } = useVideoConfig();
+  const { fps: videoFps, width, height, durationInFrames } = useVideoConfig();
   // 横竖屏自适应：宽>=高 即横屏（独立仓库版不依赖 StyleProvider 上下文）
   const long = width >= height;
   void fps;
@@ -983,14 +1178,6 @@ export const NewsPaperTemplate: React.FC<{
   const activeSection =
     sections.find((s) => s.indices.includes(currentIdx)) ?? sections[0];
   const keywords = activeSection ? activeSection.keywords : [];
-  const kwOfBlock = (() => {
-    const b = block;
-    const kw =
-      b.highlight ?? (b.stats && b.stats[0] ? b.stats[0].label : undefined) ?? b.source;
-    if (!kw) return Math.min(1, keywords.length - 1);
-    const idx = keywords.indexOf(clip(kw.trim(), 8));
-    return idx >= 0 ? idx : Math.min(1, keywords.length - 1);
-  })();
   const blockProgress = seqFrames > 0 ? Math.min(1, seqFrame / seqFrames) : 0;
 
   // 贴纸：从 runId 提取日期 → "今天是M月D日 周X"；否则用 footer/subtitle
@@ -1004,8 +1191,10 @@ export const NewsPaperTemplate: React.FC<{
     return config.footer ?? "";
   })();
 
-  const subtitleText =
-    block.subtitle ?? (block.narration ? clip(block.narration.replace(/\s+/g, ""), 28) : "");
+  // 字幕直接渲染旁白全文（不再压缩、不再胶囊底）
+  const subtitleText = block.narration
+    ? block.narration.replace(/\s+/g, "")
+    : block.subtitle ?? "";
 
   // S1 全屏插入 → chrome 淡出（段头 6 帧 / 段尾 6 帧）
   const fullBleed =
@@ -1022,6 +1211,9 @@ export const NewsPaperTemplate: React.FC<{
 
   return (
     <AbsoluteFill style={{ fontFamily: tokens.fontFamily, backgroundColor: tokens.bg }}>
+      {/* 音频层：片头记忆点音效 + 极低音量 BGM 循环 */}
+      <Audio src={staticFile("sfx/earcon.wav")} volume={0.5} />
+      <Audio src={staticFile("bgm.mp3")} volume={0.06} loop />
       <div style={{ position: "absolute", inset: 0, opacity: chromeOpacity }}>
         {/* 内容层（Series 逐块） */}
         <Series>
@@ -1042,6 +1234,7 @@ export const NewsPaperTemplate: React.FC<{
                   long={long}
                 />
                 {audio ? <Audio src={audio} /> : null}
+                {i > 0 ? <Audio src={staticFile("sfx/whoosh.wav")} volume={0.22} /> : null}
               </Series.Sequence>
             );
           })}
@@ -1055,12 +1248,12 @@ export const NewsPaperTemplate: React.FC<{
             tokens={tokens}
             fontSize={tabFont}
           />
-          <BottomKeywordTabs
-            keywords={keywords}
-            activeIndex={kwOfBlock}
-            progress={blockProgress}
+          <CatProgress
+            sections={sections}
+            currentIdx={currentIdx}
+            blockProgress={blockProgress}
+            globalP={durationInFrames > 0 ? frame / durationInFrames : 0}
             tokens={tokens}
-            fontSize={kwFont}
           />
           <StickerChip text={sticker} tokens={tokens} fontSize={kwFont} />
           <SubtitleBar
