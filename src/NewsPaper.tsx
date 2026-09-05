@@ -324,9 +324,8 @@ const StickerChip: React.FC<{ text: string; tokens: PaperTokens; fontSize: numbe
     <div
       style={{
         position: "absolute",
-        bottom: fontSize * 1.4,
-        left: "50%",
-        transform: "translateX(-50%)",
+        top: 28,
+        right: 48,
         background: tokens.stickerBg,
         color: tokens.stickerFg,
         borderRadius: 8,
@@ -356,7 +355,7 @@ const SubtitleBar: React.FC<{
     <div
       style={{
         position: "absolute",
-        bottom: fontSize * 1.1,
+        bottom: fontSize * 4.8,
         left: "50%",
         transform: `translateX(-50%) translateY(${(1 - pop) * 8}px)`,
         opacity: pop,
@@ -397,6 +396,7 @@ const TrustLine: React.FC<{
     }
   })();
   const label = source ?? host;
+  if (!label) return null;
   return (
     <div
       style={{
@@ -413,11 +413,11 @@ const TrustLine: React.FC<{
           width: 8,
           height: 8,
           borderRadius: 999,
-          background: label ? tokens.green : tokens.border,
+          background: tokens.green,
           display: "inline-block",
         }}
       />
-      <span>{label ? `${label} · 已核验快照` : "待核验"}</span>
+      <span>来源 · {label}</span>
     </div>
   );
 };
@@ -452,10 +452,11 @@ const PaperCard: React.FC<{
   words: string[];
   spotlight: boolean;
   enterFrame: number;
+  source?: string;
   tokens: PaperTokens;
   fps: number;
   bodySize: number;
-}> = ({ point, glyph, colorName, words, spotlight, enterFrame, tokens, fps, bodySize }) => {
+}> = ({ point, glyph, colorName, words, spotlight, enterFrame, source, tokens, fps, bodySize }) => {
   const { title, body } = splitPoint(point);
   const color = paperColor(tokens, colorName);
   const enter = spring({ frame: enterFrame, fps, config: { damping: 22, stiffness: 200 } });
@@ -502,7 +503,7 @@ const PaperCard: React.FC<{
       <div style={{ fontSize: bodySize, color: tokens.text, lineHeight: 1.55 }}>
         <BodyWithChips text={body} words={words} tokens={tokens} fontSize={bodySize} />
       </div>
-      <TrustLine tokens={tokens} fontSize={bodySize * 0.72} />
+      <TrustLine source={source} tokens={tokens} fontSize={bodySize * 0.72} />
     </div>
   );
 };
@@ -564,7 +565,7 @@ const GridScreen: React.FC<{
     return [points.slice(0, 3), points.slice(3, 6)];
   }, [layout, points]);
   return (
-    <AbsoluteFill style={{ justifyContent: "center", padding: long ? "96px 96px 140px" : "70px 60px 190px" }}>
+    <AbsoluteFill style={{ justifyContent: "center", padding: long ? "96px 96px 210px" : "70px 60px 250px" }}>
       {block.content ? (
         <ScreenTitle text={block.content} tokens={tokens} fontSize={titleSize} />
       ) : null}
@@ -582,6 +583,7 @@ const GridScreen: React.FC<{
                     words={kws}
                     spotlight={globalIdx === activeIdx}
                     enterFrame={seqFrame - (globalIdx * 4 + 2)}
+                    source={block.source}
                     tokens={tokens}
                     fps={fps}
                     bodySize={bodySize}
@@ -973,7 +975,9 @@ export const NewsPaperTemplate: React.FC<{
 
   // 空 blocks 守卫（Studio 空数据预览不崩）
   if (!block) {
-    return <AbsoluteFill style={{ fontFamily: tokens.fontFamily }} />;
+    return (
+      <AbsoluteFill style={{ fontFamily: tokens.fontFamily, backgroundColor: tokens.bg }} />
+    );
   }
 
   const activeSection =
@@ -1017,7 +1021,7 @@ export const NewsPaperTemplate: React.FC<{
   const kwFont = long ? 20 : 18;
 
   return (
-    <AbsoluteFill style={{ fontFamily: tokens.fontFamily }}>
+    <AbsoluteFill style={{ fontFamily: tokens.fontFamily, backgroundColor: tokens.bg }}>
       <div style={{ position: "absolute", inset: 0, opacity: chromeOpacity }}>
         {/* 内容层（Series 逐块） */}
         <Series>

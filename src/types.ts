@@ -62,6 +62,8 @@ export interface VideoBlock {
   subtitle?: string;
   /** 关键词（行内 chip + 底部词条 tab 高亮） */
   highlight?: string;
+  /** 板块 key（顶部 tab 分区：ai-news=要闻 / cn-news=国内 / intl-news=环球 / other-news=行业动态 / ent-news=文娱） */
+  section?: string;
   /** ===== news-paper 模板扩展（全可选，缺省走自动路由）===== */
   /** 模板覆盖（T1-T6） */
   template?: "T1" | "T2" | "T3" | "T4" | "T5" | "T6";
