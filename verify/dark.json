@@ -1,0 +1,15 @@
+{
+  "config": {
+    "type": "ai-news",
+    "style": "news-paper-dark",
+    "template": "news-paper",
+    "title": "AI 晚报 · 验证片",
+    "runId": "ai-news-evening-2026-09-04",
+    "chapters": [],
+    "blocks": [
+      { "type": "title", "content": "2026-09-04 资讯概览", "subtitle": "欢迎收看今天的AI晚报" },
+      { "type": "text", "content": "HUMAIN 发布阿拉伯语大模型 M3", "points": ["基座训练：两万亿 tokens 语料", "语言能力：阿拉伯语评测 SOTA", "上线状态：API 已开放", "推理设施：自建数据中心集群", "官方局限：长上下文仍待验证"], "source": "HUMAIN", "subtitle": "五要点速览M3大模型" },
+      { "type": "chart", "content": "Developer Search Benchmark RECALL@10", "data": [{ "label": "Firecrawl Dev Index", "value": 0.63 }, { "label": "Parallel Web", "value": 0.57 }, { "label": "Exa", "value": 0.54 }, { "label": "Native search", "value": 0.45 }], "source": "Firecrawl", "subtitle": "官方称覆盖超7000万来源" }
+    ]
+  }
+}

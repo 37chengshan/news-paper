@@ -1,0 +1,16 @@
+﻿title: 鍑洪敊鍟? - bilibili.com
+playinfo type: undefined
+node.exe : file:///D:/motion/data/tmp/up-research/get_playinfo.mjs:45
+所在位置 行:447 字符: 1
++ & $node "$cwd\get_playinfo.mjs" BV1U5tJ6kEXJ 2>&1 | Out-File -FilePat ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (file:///D:/moti...playinfo.mjs:45:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+const dash = d.dash || (d.data && d.data.dash);
+               ^
+
+TypeError: Cannot read properties of null (reading 'dash')
+    at file:///D:/motion/data/tmp/up-research/get_playinfo.mjs:45:16
+
+Node.js v22.22.2

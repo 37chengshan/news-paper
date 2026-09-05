@@ -1,0 +1,15 @@
+node_modules/
+out/
+.remotion/
+*.log
+*.mp4
+
+# 逆向研究产物：仅保留方法学脚本/playinfo/渠道数据；剔除帧图、视频、Chrome profile 转储与页面 dump
+research/**/*.png
+research/**/*.jpg
+research/**/*.jpeg
+research/**/*.mp4
+research/**/*.webp
+research/**/profile/
+research/**/*.html
+research/**/frames/
