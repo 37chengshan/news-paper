@@ -706,9 +706,9 @@ const EvidenceScreen: React.FC<{
     return (
       <AbsoluteFill style={{ background: "#000", opacity: enter }}>
         {block.type === "video" && src ? (
-          <Video src={src} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          <Video src={staticFile(src)} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
         ) : src ? (
-          <img src={src} alt={caption} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          <img src={staticFile(src)} alt={caption} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
         ) : (
           <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
             <div style={{ color: "#fff", fontSize: long ? 40 : 34 }}>{caption}</div>
@@ -738,7 +738,7 @@ const EvidenceScreen: React.FC<{
         </div>
         {block.type === "video" && src ? (
           <Video
-            src={src}
+            src={staticFile(src)}
             style={{
               width: "92%",
               borderRadius: 12,
@@ -748,7 +748,7 @@ const EvidenceScreen: React.FC<{
           />
         ) : (
           <img
-            src={src}
+            src={staticFile(src)}
             alt={caption}
             style={{
               maxWidth: "92%",
@@ -784,10 +784,10 @@ const EvidenceScreen: React.FC<{
         }}
       >
         {block.type === "video" && src ? (
-          <Video src={src} style={{ width: "100%", borderRadius: 10 }} />
+          <Video src={staticFile(src)} style={{ width: "100%", borderRadius: 10 }} />
         ) : (
           <img
-            src={src}
+            src={staticFile(src)}
             alt={caption}
             style={{ width: "100%", maxHeight: long ? 520 : 560, objectFit: "contain", borderRadius: 10 }}
           />

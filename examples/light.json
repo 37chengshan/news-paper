@@ -12,7 +12,7 @@
       { "type": "text", "content": "HUMAIN 发布阿拉伯语大模型 M3", "points": ["基座训练：两万亿 tokens 语料", "语言能力：阿拉伯语评测 SOTA", "上线状态：API 已开放", "推理设施：自建数据中心集群", "官方局限：长上下文仍待验证"], "source": "HUMAIN", "subtitle": "五要点速览M3大模型" },
       { "type": "text", "content": "NVIDIA 宣布收购 Hugging Face", "summary": "官方承诺保持平台开放、独立与计算中立，交易金额未披露，监管审批预计半年内完成。", "facts": ["双方已签署最终协议", "Hugging Face 保持独立品牌运营"], "source": "NVIDIA", "url": "https://www.nvidia.com/blog", "subtitle": "官方承诺保持平台开放独立" },
       { "type": "chart", "content": "Developer Search Benchmark RECALL@10", "data": [{ "label": "Firecrawl Dev Index", "value": 0.63 }, { "label": "Parallel Web", "value": 0.57 }, { "label": "Exa", "value": 0.54 }, { "label": "Native search", "value": 0.45 }], "source": "Firecrawl", "subtitle": "官方称覆盖超7000万来源" },
-      { "type": "image", "src": "/verify-paper.jpg", "evidence": { "scale": "card", "caption": "GMI Cloud 模型库截图" }, "content": "推理平台模型库一览", "media": { "credit": "GMI Cloud" }, "source": "GMI Cloud", "subtitle": "推理主要接入GMI平台" }
+      { "type": "image", "src": "verify-paper.jpg", "evidence": { "scale": "card", "caption": "GMI Cloud 模型库截图" }, "content": "推理平台模型库一览", "media": { "credit": "GMI Cloud" }, "source": "GMI Cloud", "subtitle": "推理主要接入GMI平台" }
     ]
   },
   "timeline": {
